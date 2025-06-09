@@ -1,0 +1,47 @@
+permissions:
+  id-token: write # This is required for requesting the JWT
+
+on: 
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '.github/**' # this will allow ignore changes in workflow files
+
+  release:
+    types:
+      - published
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  FOLDER_ID: b1gd0tkp93l5d4qdpqal
+  SA_ID: aje45vjuvqn74d7vrmqv
+  FUNCTION_NAME: crop-image-prod
+  FUNCTION_RUNTIME: nodejs22
+  FUNCTION_ENTRYPOINT: index.handler
+  FUNCTION_MEMORY: 128Mb
+  FUNCTION_SOURCEROOT: src/functions/crop-image/
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Function
+        id: sls-func
+        uses: yc-actions/yc-sls-function@v3.1.0
+        with:
+          yc-sa-id: ${{env.SA_ID}}
+          folder-id: ${{env.FOLDER_ID}}
+          function-name: ${{env.FUNCTION_NAME}}
+          runtime: ${{env.FUNCTION_RUNTIME}}
+          memory: ${{env.FUNCTION_MEMORY}}
+          entrypoint: ${{env.FUNCTION_ENTRYPOINT}}
+          source-root: ${{env.FUNCTION_SOURCEROOT}}
+          include: |
+            **/*.json
+            **/*.js
+
